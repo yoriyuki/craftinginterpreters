@@ -1,13 +1,13 @@
 BUILD_DIR := build
-TOOL_SOURCES := tool/pubspec.lock $(shell find tool -name '*.dart')
+TOOL_SOURCES := tool/pubspec.lock $(shell find tool -name '*.fvm dart')
 BUILD_SNAPSHOT := $(BUILD_DIR)/build.dart.snapshot
 TEST_SNAPSHOT := $(BUILD_DIR)/test.dart.snapshot
 
 default: book clox jlox
 
-# Run dart pub get on tool directory.
+# Run fvm dart pub get on tool directory.
 get:
-	@ cd ./tool; dart pub get
+	@ cd ./tool; fvm dart pub get
 
 # Remove all build outputs and intermediate files.
 clean:
@@ -16,46 +16,46 @@ clean:
 
 # Build the site.
 book: $(BUILD_SNAPSHOT)
-	@ dart $(BUILD_SNAPSHOT)
+	@ fvm dart $(BUILD_SNAPSHOT)
 
 # Run a local development server for the site that rebuilds automatically.
 serve: $(BUILD_SNAPSHOT)
-	@ dart $(BUILD_SNAPSHOT) --serve
+	@ fvm fvm dart $(BUILD_SNAPSHOT) --serve
 
 $(BUILD_SNAPSHOT): $(TOOL_SOURCES)
 	@ mkdir -p build
-	@ echo "Compiling Dart snapshot..."
-	@ dart --snapshot=$@ --snapshot-kind=app-jit tool/bin/build.dart >/dev/null
+	@ echo "Compiling fvm dart snapshot..."
+	@ fvm dart --snapshot=$@ --snapshot-kind=app-jit tool/bin/build.dart >/dev/null
 
 # Run the tests for the final versions of clox and jlox.
 test: debug jlox $(TEST_SNAPSHOT)
-	@- dart $(TEST_SNAPSHOT) clox
-	@ dart $(TEST_SNAPSHOT) jlox
+	@- fvm dart $(TEST_SNAPSHOT) clox
+	@ fvm dart $(TEST_SNAPSHOT) jlox
 
 # Run the tests for the final version of clox.
 test_clox: debug $(TEST_SNAPSHOT)
-	@ dart $(TEST_SNAPSHOT) clox
+	@ fvm dart $(TEST_SNAPSHOT) clox
 
 # Run the tests for the final version of jlox.
 test_jlox: jlox $(TEST_SNAPSHOT)
-	@ dart $(TEST_SNAPSHOT) jlox
+	@ fvm dart $(TEST_SNAPSHOT) jlox
 
 # Run the tests for every chapter's version of clox.
 test_c: debug c_chapters $(TEST_SNAPSHOT)
-	@ dart $(TEST_SNAPSHOT) c
+	@ fvm dart $(TEST_SNAPSHOT) c
 
 # Run the tests for every chapter's version of jlox.
 test_java: jlox java_chapters $(TEST_SNAPSHOT)
-	@ dart $(TEST_SNAPSHOT) java
+	@ fvm dart $(TEST_SNAPSHOT) java
 
 # Run the tests for every chapter's version of clox and jlox.
 test_all: debug jlox c_chapters java_chapters compile_snippets $(TEST_SNAPSHOT)
-	@ dart $(TEST_SNAPSHOT) all
+	@ fvm dart $(TEST_SNAPSHOT) all
 
 $(TEST_SNAPSHOT): $(TOOL_SOURCES)
 	@ mkdir -p build
-	@ echo "Compiling Dart snapshot..."
-	@ dart --snapshot=$@ --snapshot-kind=app-jit tool/bin/test.dart clox >/dev/null
+	@ echo "Compiling fvm dart snapshot..."
+	@ fvm dart --snapshot=$@ --snapshot-kind=app-jit tool/bin/test.dart clox >/dev/null
 
 # Compile a debug build of clox.
 debug:
@@ -193,14 +193,14 @@ diffs: split_chapters java_chapters
 	@ -diff --new-file gen/chap29_superclasses/ gen/chap30_optimization/ > build/diffs/chap30_optimization.diff
 
 split_chapters:
-	@ dart tool/bin/split_chapters.dart
+	@ fvm dart tool/bin/split_chapters.dart
 
 compile_snippets:
-	@ dart tool/bin/compile_snippets.dart
+	@ fvm dart tool/bin/compile_snippets.dart
 
 # Generate the XML for importing into InDesign.
 xml: $(TOOL_SOURCES)
-	@ dart --enable-asserts tool/bin/build_xml.dart
+	@ fvm dart --enable-asserts tool/bin/build_xml.dart
 
 .PHONY: book c_chapters clean clox compile_snippets debug default diffs \
 	get java_chapters jlox serve split_chapters test test_all test_c test_java
